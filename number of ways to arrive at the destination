@@ -1,0 +1,42 @@
+#include<bits/stdc++.h>
+using namespace std;
+class Solution {
+    public:
+        int countPaths(int n, vector<vector<int>>& roads) {
+            priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<>> pq;
+            unordered_map<int, vector<pair<int, int>>> adjList;
+            int mod = 1e9 + 7;
+            
+            // Build graph
+            for (auto& it : roads) {
+                int src = it[0];
+                int dest = it[1];
+                int time = it[2];
+                adjList[src].push_back({dest, time});
+                adjList[dest].push_back({src, time});
+            }
+            
+            vector<long long> dist(n, LLONG_MAX);
+            vector<int> ways(n, 0);
+            pq.push({0LL, 0}); // {dist, node}
+            dist[0] = 0;
+            ways[0] = 1;
+    
+            while (!pq.empty()) {
+                auto [time, node] = pq.top();
+                pq.pop();
+                for (auto& [nextnode, nexttime] : adjList[node]) {
+                    long long totalTime = time + nexttime;
+                    if (totalTime < dist[nextnode]) {
+                        dist[nextnode] = totalTime;
+                        ways[nextnode] = ways[node];
+                        pq.push({dist[nextnode], nextnode});
+                    }
+                    else if (totalTime == dist[nextnode]) {
+                        ways[nextnode] = (ways[nextnode] + ways[node]) % mod;
+                    }
+                }
+            }
+            return ways[n - 1];
+        }
+    };
